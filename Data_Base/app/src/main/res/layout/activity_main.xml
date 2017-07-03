@@ -53,6 +53,25 @@
             android:layout_height="wrap_content"
             android:text="num"
             />
+
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Spinner
+            android:id = "@+id/Spinner_foregin"
+            android:layout_width = "100dp"
+            android:layout_height ="wrap_content" >
+        </Spinner >
+
+        <Spinner
+            android:id = "@+id/Spinner_home"
+            android:layout_width = "100dp"
+            android:layout_height ="wrap_content" >
+        </Spinner >
+
     </LinearLayout>
 
         <ListView
