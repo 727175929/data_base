@@ -5,28 +5,41 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
 
     private MyDatabaseHelper dbHelper;
+    private List<Data> dataList = new ArrayList<Data>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dbHelper = new MyDatabaseHelper(this,"DateBase",null,1);  //第二个参数为数据库名
+        dbHelper.getWritableDatabase();//创建数据库
 
-        Button createDatabase = (Button) findViewById(R.id.create_database);  //创建数据库
-        createDatabase.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dbHelper.getWritableDatabase();
-            }
-        });
+//        initData();//初始化data
+        final DataAdapter apdater = new DataAdapter(MainActivity.this,R.layout.data_item,dataList);
+        final ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setAdapter(apdater);
+
+        init();//数据库中导入
+        apdater.notifyDataSetChanged(); //更新LIST
+
+//        Button createDatabase = (Button) findViewById(R.id.create_database);  //创建数据库
+//        createDatabase.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dbHelper.getWritableDatabase();
+//            }
+//        });
 
         Button addData = (Button) findViewById(R.id.add_data);    //添加数据
         addData.setOnClickListener(new View.OnClickListener() {
@@ -44,6 +57,12 @@ public class MainActivity extends Activity {
                 values.put("home","A");
                 values.put("num",4.5);
                 db.insert("datebase",null,values);
+//                Data a = new Data("a","c",44.5);
+//                dataList.add(a);
+//                apdater.notifyDataSetChanged();
+                init();
+                apdater.notifyDataSetChanged();
+
             }
         });
 
@@ -55,6 +74,8 @@ public class MainActivity extends Activity {
                 ContentValues values = new ContentValues();
                 values.put("num","10086");
                 db.update("datebase",values,"home = ?",new String[]{"A"});
+                init();
+                apdater.notifyDataSetChanged();
             }
         });
 
@@ -64,25 +85,51 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 db.delete("datebase","num = ?",new String[] {"10086"});
+                init();
+                apdater.notifyDataSetChanged();
             }
         });
 
-        Button queryButton = (Button) findViewById(R.id.query_date);
-        queryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                Cursor cursor = db.query("datebase",null,null,null,null,null,null);
-                if(cursor.moveToFirst()){
-                    do{
-                        String foregin = cursor.getString(cursor.getColumnIndex("foregin"));
-                        String home = cursor.getString(cursor.getColumnIndex("home"));
-                        double num = cursor.getDouble(cursor.getColumnIndex("num"));
-                        Log.d("MainActivity",foregin+home+num);
-                    }while (cursor.moveToNext());
-                }
-                cursor.close();
-            }
-        });
+//        Button queryButton = (Button) findViewById(R.id.query_date);
+//        queryButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                SQLiteDatabase db = dbHelper.getWritableDatabase();
+//                Cursor cursor = db.query("datebase",null,null,null,null,null,null);
+//                Data a;
+//                if(cursor.moveToFirst()){
+//                    do{
+//                        String foregin = cursor.getString(cursor.getColumnIndex("foregin"));
+//                        String home = cursor.getString(cursor.getColumnIndex("home"));
+//                        double num = cursor.getDouble(cursor.getColumnIndex("num"));
+//                        a = new Data(foregin,home,num);
+//                        dataList.add(a);
+//                    }while (cursor.moveToNext());
+//                }
+//                cursor.close();
+//            }
+//        });
+
     }
+
+    private void init(){
+        dataList.clear();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.query("datebase",null,null,null,null,null,null);
+        Data a;
+        if(cursor.moveToFirst()){
+            do{
+                String foregin = cursor.getString(cursor.getColumnIndex("foregin"));
+                String home = cursor.getString(cursor.getColumnIndex("home"));
+                double num = cursor.getDouble(cursor.getColumnIndex("num"));
+                a = new Data(foregin,home,num);
+                dataList.add(a);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+    }
+//    private void initData() {
+//        Data a = new Data("a","c",4.5);
+//        dataList.add(a);
+//    }
 }
